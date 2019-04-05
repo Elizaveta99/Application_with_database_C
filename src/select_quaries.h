@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
-void select_data(sqlite3* db);
+void select_data(sqlite3* db, char* login);
 void get_sum_for_period(sqlite3* db, sqlite3_stmt **res);
 void get_max_demand_composition_info(sqlite3* db, sqlite3_stmt **res);
 void get_express_orders_count(sqlite3* db, sqlite3_stmt **res);

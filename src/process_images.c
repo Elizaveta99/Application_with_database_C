@@ -60,7 +60,7 @@ void insert_image (sqlite3* db)
     int rc;
     char* sql;
     
-    sql = "UPDATE states SET flag=@flag WHERE id = @id";
+    sql = "UPDATE states SET Photo=@Photo WHERE id = @id";
     rc = sqlite3_prepare(db, sql, -1, &p_stmt, 0);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Cannot prepare statement: %s\n", sqlite3_errmsg(db));
@@ -69,7 +69,7 @@ void insert_image (sqlite3* db)
     int idx = sqlite3_bind_parameter_index(p_stmt, "@id");
     
     sqlite3_bind_int(p_stmt, idx, id);
-    idx = sqlite3_bind_parameter_index(p_stmt, "@flag");
+    idx = sqlite3_bind_parameter_index(p_stmt, "@Photo");
     sqlite3_bind_blob(p_stmt, idx, data, size, SQLITE_STATIC);
     rc = sqlite3_step(p_stmt);
     if (rc != SQLITE_DONE)
@@ -95,7 +95,7 @@ void read_image(sqlite3 *db)
     
     sqlite3_stmt *p_stmt;
     int rc;
-    char* sql = "SELECT flag FROM states WHERE Id = @id";
+    char* sql = "SELECT Photo FROM Flowers WHERE Id = @id";
     
     rc = sqlite3_prepare_v2(db, sql, -1, &p_stmt, 0);
     if (rc != SQLITE_OK ) {
@@ -108,7 +108,7 @@ void read_image(sqlite3 *db)
     rc = sqlite3_step(p_stmt);
     
     int bytes = 0;
-    idx = sqlite3_bind_parameter_index(p_stmt, "@flag");
+    idx = sqlite3_bind_parameter_index(p_stmt, "@Photo");
     
     if (rc == SQLITE_ROW) {
         bytes = sqlite3_column_bytes(p_stmt, idx);

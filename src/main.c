@@ -7,7 +7,7 @@
 
 void perform_operation(sqlite3* db, char* login) {
     int choice = 0;
-    int role = 1; //int role = check_role ()
+    int role = 0; //int role = check_role ()
     
     do {
         fprintf(stdout, "1 - SELECT\n");
@@ -25,7 +25,7 @@ void perform_operation(sqlite3* db, char* login) {
         scanf("%d", &choice);
         switch (choice) {
             case 1:
-                select_data(db);
+                select_data(db, login);
                 break;
             case 2:
             {

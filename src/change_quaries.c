@@ -10,22 +10,37 @@ void insert_data (sqlite3* db, char* login)
     char *sql = malloc(256);
     sqlite3_stmt *res = NULL;
     int rc;
-    char* err_msg;
+    char* err_msg = NULL;
     char date_end[256];
     char composition[256];
     int amount;
     
-    fprintf(stdout, "put info ([date_end] [composition] [amount]: \n");
+    fprintf(stdout, "put info ([date_end (YYYYMMDD)] [composition] [amount]: \n");
     scanf("%s %s %d",date_end, composition, &amount);
     
-    sprintf(sql,"SELECT id FROM Compositions WHERE Composition_name='%s'",composition);
-    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
-    int comp_id = atoi((char*)sqlite3_column_text(res, 0));
-    sqlite3_finalize(res);
+    int comp_id = 0;
+    int cust_id = 0;
+    int order_id = 0;
+    int step;
     
-    sprintf(sql,"SELECT id FROM Flower_compositions WHERE Login='%s'",login);
+    sprintf(sql,"SELECT Id FROM Flower_compositions WHERE Composition_name='%s'",composition);
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
-    int cust_id = atoi((char*)sqlite3_column_text(res, 0));
+    step = sqlite3_step(res);
+    if (step == SQLITE_ROW)
+       comp_id = atoi((char*)sqlite3_column_text(res, 0));
+    
+    sprintf(sql,"SELECT Id FROM Authorization WHERE Login='%s'",login);
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+    step = sqlite3_step(res);
+    if (step == SQLITE_ROW)
+        cust_id = atoi((char*)sqlite3_column_text(res, 0));
+    
+    sprintf(sql, "SELECT max(Id) FROM Orders");
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+    step = sqlite3_step(res);
+    if (step == SQLITE_ROW)
+        order_id = atoi((char*)sqlite3_column_text(res, 0));
+    
     sqlite3_finalize(res);
     
     char date_begin[80];
@@ -33,7 +48,7 @@ void insert_data (sqlite3* db, char* login)
     struct tm* time_info = localtime(&seconds);
     strftime(date_begin, 80, "%d.%m.%y", time_info);
     
-    sprintf(sql, "INSERT INTO Order VALUES (%lld, '%s', '%s', %d, %d, %d)",sqlite3_last_insert_rowid(db)+1,date_begin, date_end, cust_id, comp_id, amount);
+    sprintf(sql, "INSERT INTO Orders VALUES (%d, '%s', '%s', %d, %d, %d)", order_id + 1 ,date_begin, date_end, cust_id, comp_id, amount);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         fprintf(stderr, "Failed to insert data\n");
