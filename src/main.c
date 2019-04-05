@@ -52,7 +52,7 @@ int autorize(sqlite3 *db, struct User* user)
     }
     
     
-    fprintf(stdout, "\nEnter password: ");
+    fprintf(stdout, "Enter password: ");
     scanf("%s", password_s);
     
     if (strcmp(password_s, password_ok_s) == 0)
@@ -133,7 +133,6 @@ int main()
     int res = autorize(db, &user);
     if (res == -1)
     {
-        fprintf(stdout, "%s\n", user.login);
         if (strcmp(user.login, "failed_login") == 0)
             fprintf(stdout, "Invalid login\n");
         else
