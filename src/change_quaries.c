@@ -1,11 +1,9 @@
 #include "change_quaries.h"
-#include "process_images.h"
-#include "orders_work.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-void insert_data (sqlite3* db, char* login)
+void insert_data (sqlite3* db, struct User user)
 {
     char *sql = malloc(256);
     sqlite3_stmt *res = NULL;
@@ -29,7 +27,7 @@ void insert_data (sqlite3* db, char* login)
     if (step == SQLITE_ROW)
        comp_id = atoi((char*)sqlite3_column_text(res, 0));
     
-    sprintf(sql,"SELECT Id FROM Authorization WHERE Login='%s'",login);
+    sprintf(sql,"SELECT User_id FROM Authorization WHERE Login='%s'",user.login);
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
     step = sqlite3_step(res);
     if (step == SQLITE_ROW)
@@ -48,7 +46,7 @@ void insert_data (sqlite3* db, char* login)
     struct tm* time_info = localtime(&seconds);
     strftime(date_begin, 80, "%d.%m.%y", time_info);
     
-    sprintf(sql, "INSERT INTO Orders VALUES (%d, '%s', '%s', %d, %d, %d)", order_id + 1 ,date_begin, date_end, cust_id, comp_id, amount);
+    sprintf(sql, "INSERT INTO Orders VALUES (%d, %s, %s, %d, %d, %d)", order_id + 1 ,date_begin, date_end, cust_id, comp_id, amount);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         fprintf(stderr, "Failed to insert data\n");

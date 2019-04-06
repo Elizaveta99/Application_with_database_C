@@ -34,11 +34,12 @@ void print_results (sqlite3_stmt *res, int column)
     printf("\n");
 }
 
-void select_data(sqlite3* db, char* login)
+void select_data(sqlite3* db, struct User user)
 {
     sqlite3_stmt *res = NULL;
     int choice;
-    int role = 0; //check_role();
+    int role = user.role;
+    char* login = user.login;
     
     if(role == 0)
         fprintf(stdout, "select all (1 [table])\n");
@@ -67,7 +68,7 @@ void select_data(sqlite3* db, char* login)
             }
             else {
                 int id = 0;
-                sprintf(sql,"SELECT Id FROM Authorization WHERE Login='%s'",login);
+                sprintf(sql,"SELECT User_id FROM Authorization WHERE Login='%s'",login);
                 rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
                 int step = sqlite3_step(res);
                 if (step == SQLITE_ROW)
@@ -135,12 +136,12 @@ void get_max_demand_composition_info(sqlite3* db, sqlite3_stmt **res)
 
 void get_express_orders_count(sqlite3* db, sqlite3_stmt **res)
 {
-    
+    // разность между датами 0 или 1
 }
 
 void get_used_flowers_count(sqlite3* db, sqlite3_stmt **res)
 {
-    
+ // для каждого цветка вывести
 }
 
 void get_sailed_compositions_info(sqlite3* db, sqlite3_stmt **res)
@@ -154,7 +155,7 @@ void get_sailed_compositions_info(sqlite3* db, sqlite3_stmt **res)
     sprintf(sql, "SELECT Composition_name, Flower_compositions.Amount, Flowers.Name AS Flower_name, Flowers.Kind, Flowers.Cost\
     FROM Orders,    OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
     WHERE Orders.Id= OrdersFlower_compositions.Order_id AND OrdersFlower_compositions.Flower_compositions_id=Flower_compositions.Id AND Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id AND  FlowersFlower_compositions.Flowers_id=Flowers.Id \
-        AND Date_end <='%s'  GROUP BY Orders.Id", current_date);
+        AND Date_end <=%s  GROUP BY Orders.Id", current_date);
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
@@ -167,7 +168,7 @@ void get_orders_for_date (sqlite3* db, sqlite3_stmt **res)
     char date[9];
     
     scanf(" %s",date);
-    sprintf(sql, "SELECT * FROM Orders WHERE Date_begin ='%s' GROUP BY Orders.Id", date);
+    sprintf(sql, "SELECT * FROM Orders WHERE Date_begin =%s GROUP BY Orders.Id", date);
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
