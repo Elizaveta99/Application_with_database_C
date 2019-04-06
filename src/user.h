@@ -11,4 +11,4 @@ struct User
     int role;
 };
 
-#endif 
+#endif

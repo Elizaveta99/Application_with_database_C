@@ -44,7 +44,7 @@ void select_data(sqlite3* db, struct User user)
     if(role == 0)
         fprintf(stdout, "select all (1 [table])\n");
     else
-         fprintf(stdout, "select all (1)\n");
+        fprintf(stdout, "select all (1)\n");
     fprintf(stdout, "select sum for period (2 [date_begin] [date_end])\n");
     fprintf(stdout, "select composition info with max demand (3)\n");
     fprintf(stdout, "select count of performed express orders (4)\n");
@@ -110,7 +110,7 @@ void select_data(sqlite3* db, struct User user)
         print_results(res, column);
         step = sqlite3_step(res);
     }
-     sqlite3_finalize(res);
+    sqlite3_finalize(res);
 }
 
 void get_sum_for_period (sqlite3* db, sqlite3_stmt **res)
@@ -122,8 +122,8 @@ void get_max_demand_composition_info(sqlite3* db, sqlite3_stmt **res)
 {
     char* sql;
     sql = "SELECT Composition_name, Flower_compositions.Amount, Flowers.Name AS Flower_name, Flowers.Kind, Flowers.Cost, count (Orders.Id) AS Orders_num \
-        FROM Orders,    OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
-        WHERE Orders.Id= OrdersFlower_compositions.Order_id AND OrdersFlower_compositions.Flower_compositions_id=Flower_compositions.Id AND Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id AND  FlowersFlower_compositions.Flowers_id=Flowers.Id \
+    FROM Orders,    OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
+    WHERE Orders.Id= OrdersFlower_compositions.Order_id AND OrdersFlower_compositions.Flower_compositions_id=Flower_compositions.Id AND Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id AND  FlowersFlower_compositions.Flowers_id=Flowers.Id \
     GROUP BY Orders.Id HAVING count(Orders.Id) =\
     (SELECT max(A.Orders_num) FROM (SELECT count(Orders.Id) AS Orders_num \
     FROM Orders , OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
@@ -141,7 +141,7 @@ void get_express_orders_count(sqlite3* db, sqlite3_stmt **res)
 
 void get_used_flowers_count(sqlite3* db, sqlite3_stmt **res)
 {
- // для каждого цветка вывести
+    // для каждого цветка вывести
 }
 
 void get_sailed_compositions_info(sqlite3* db, sqlite3_stmt **res)
@@ -153,9 +153,9 @@ void get_sailed_compositions_info(sqlite3* db, sqlite3_stmt **res)
     strftime(current_date, 9, "%Y%m%d", time_info);
     
     sprintf(sql, "SELECT Composition_name, Flower_compositions.Amount, Flowers.Name AS Flower_name, Flowers.Kind, Flowers.Cost\
-    FROM Orders,    OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
-    WHERE Orders.Id= OrdersFlower_compositions.Order_id AND OrdersFlower_compositions.Flower_compositions_id=Flower_compositions.Id AND Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id AND  FlowersFlower_compositions.Flowers_id=Flowers.Id \
-        AND Date_end <=%s  GROUP BY Orders.Id", current_date);
+            FROM Orders,    OrdersFlower_compositions, Flower_compositions , FlowersFlower_compositions, Flowers \
+            WHERE Orders.Id= OrdersFlower_compositions.Order_id AND OrdersFlower_compositions.Flower_compositions_id=Flower_compositions.Id AND Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id AND  FlowersFlower_compositions.Flowers_id=Flowers.Id \
+            AND Date_end <=%s  GROUP BY Orders.Id", current_date);
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));

@@ -1,4 +1,5 @@
 #include "change_quaries.h"
+#include "orders_work.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -13,7 +14,7 @@ void insert_data (sqlite3* db, struct User user)
     char composition[256];
     int amount;
     
-    fprintf(stdout, "put info ([date_end (YYYYMMDD)] [composition] [amount]: \n");
+    fprintf(stdout, "put info ([date_end (YYMMDD)] [composition] [amount]: \n");
     scanf("%s %s %d",date_end, composition, &amount);
     
     int comp_id = 0;
@@ -25,7 +26,7 @@ void insert_data (sqlite3* db, struct User user)
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
     step = sqlite3_step(res);
     if (step == SQLITE_ROW)
-       comp_id = atoi((char*)sqlite3_column_text(res, 0));
+        comp_id = atoi((char*)sqlite3_column_text(res, 0));
     
     sprintf(sql,"SELECT User_id FROM Authorization WHERE Login='%s'",user.login);
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
@@ -44,9 +45,9 @@ void insert_data (sqlite3* db, struct User user)
     char date_begin[80];
     time_t seconds = time(0);
     struct tm* time_info = localtime(&seconds);
-    strftime(date_begin, 80, "%d.%m.%y", time_info);
+    strftime(date_begin, 80, "%y%m%d", time_info);
     
-    sprintf(sql, "INSERT INTO Orders VALUES (%d, %s, %s, %d, %d, %d)", order_id + 1 ,date_begin, date_end, cust_id, comp_id, amount);
+    sprintf(sql, "INSERT INTO Orders VALUES (%d, %s, %s, %d, %d)", order_id + 1 ,date_begin, date_end, amount, cust_id);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         fprintf(stderr, "Failed to insert data\n");
@@ -58,7 +59,31 @@ void insert_data (sqlite3* db, struct User user)
         printf("The last id of the inserted row is %lld\n",sqlite3_last_insert_rowid(db));
     }
     free(sql);
-    count_order_price(db);
+    
+    sql = malloc(256);
+    sprintf(sql, "SELECT max(Id) FROM OrdersFlower_compositions");
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+    step = sqlite3_step(res);
+    int comp_order_id = -1;
+    if (step == SQLITE_ROW)
+        comp_order_id = atoi((char*)sqlite3_column_text(res, 0));
+    free(sql);
+    
+    
+    sql = malloc(256);
+    sprintf(sql, "INSERT INTO OrdersFlower_compositions VALUES (%d, %d, %d)", comp_order_id + 1, comp_id, cust_id);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+    if (rc != SQLITE_OK ) {
+        fprintf(stderr, "Failed to insert data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+    }
+    else {
+        fprintf(stdout, "Data was inserted successfully\n");
+    }
+    free(sql);
+    
+    count_order_price(db, order_id + 1, date_begin, date_end, cust_id, comp_id, amount);
 }
 
 void update_data (sqlite3* db)
