@@ -133,10 +133,7 @@ int main()
     int res = autorize(db, &user);
     if (res == -1)
     {
-<<<<<<< HEAD
-=======
         fprintf(stdout, "%s\n", user.login);
->>>>>>> dev_database
         if (strcmp(user.login, "failed_login") == 0)
             fprintf(stdout, "Invalid login\n");
         else

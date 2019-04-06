@@ -11,8 +11,4 @@ struct User
     int role;
 };
 
-<<<<<<< HEAD
-#endif
-=======
 #endif 
->>>>>>> dev_database
