@@ -26,7 +26,7 @@ void insert_data (sqlite3* db, struct User user)
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
     step = sqlite3_step(res);
     if (step == SQLITE_ROW)
-       comp_id = atoi((char*)sqlite3_column_text(res, 0));
+        comp_id = atoi((char*)sqlite3_column_text(res, 0));
     
     sprintf(sql,"SELECT User_id FROM Authorization WHERE Login='%s'",user.login);
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
@@ -45,11 +45,11 @@ void insert_data (sqlite3* db, struct User user)
     char date_begin[80];
     time_t seconds = time(0);
     struct tm* time_info = localtime(&seconds);
-    strftime(date_begin, 80, "%d%d%d", time_info);
+    strftime(date_begin, 80, "%Y%m%d", time_info);
     
     sprintf(sql, "INSERT INTO Orders VALUES (%d, %s, %s, %d, %d)", order_id + 1 ,date_begin, date_end, amount, cust_id);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
-    if (rc != SQLITE_OK ) {
+    /*if (rc != SQLITE_OK ) {
         fprintf(stderr, "Failed to insert data\n");
         fprintf(stderr, "SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
@@ -57,7 +57,7 @@ void insert_data (sqlite3* db, struct User user)
     else {
         fprintf(stdout, "Data was inserted successfully\n");
         printf("The last id of the inserted row is %lld\n",sqlite3_last_insert_rowid(db));
-    }
+    }*/
     free(sql);
     
     sql = malloc(256);
@@ -71,11 +71,15 @@ void insert_data (sqlite3* db, struct User user)
     
     
     sql = malloc(256);
-    sprintf(sql, "INSERT INTO OrdersFlower_compositions VALUES (%d, %d, %d)", comp_order_id + 1, comp_id, comp_order_id + 1);
+    sprintf(sql, "INSERT INTO OrdersFlower_compositions VALUES (%d, %d, %d)", comp_order_id + 1, comp_id, cust_id);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
+        fprintf(stderr, "Failed to insert data\n");
         fprintf(stderr, "SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
+    }
+    else {
+        fprintf(stdout, "Data was inserted successfully\n");
     }
     free(sql);
     
