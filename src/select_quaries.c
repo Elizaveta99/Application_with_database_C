@@ -188,19 +188,13 @@ void get_used_flowers_count(sqlite3* db, sqlite3_stmt **res)
     //fprintf(stdout, "Enter period ([date_degin (YYYYMMDD)] [date_end (YYYYMMDD)])\n");
     scanf(" %d %d", &date_begin, &date_end);
     
-//    sprintf(sql, "SELECT Name, Kind FROM Flowers \
-//            WHERE Flowers.Id IN (SELECT Flowers_id, count(Flowers_id) FROM FlowersFlower_compositions \
-//            WHERE FlowersFlower_compositions.Flower_compositions_id=OrdersFlower_compositions.Flower_compositions_id \
-//            AND OrdersFlower_compositions.Order_id=Orders.Id \
-//            AND Orders.Id IN SELECT(Orders.Id FROM Orders WHERE \
-//            Date_begin>=%d AND Date_begin<=%d) GROUP BY Flowers_id)", date_begin, date_end);
-    
-    sprintf(sql, "SELECT Name, Kind, count(Flowers_id) FROM Flowers JOIN FlowersFlower_compositions \
-            ON Flowers.Id=Flowers_id \
-            WHERE FlowersFlower_compositions.Flower_compositions_id=OrdersFlower_compositions.Flower_compositions_id \
+    sprintf(sql, "SELECT Flowers.Name, Flowers.Kind, (Flower_compositions.Amount) * count(Flowers.Id) \
+            FROM Flowers, Flower_compositions, FlowersFlower_compositions, OrdersFlower_compositions, Orders \
+            WHERE Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id \
+            AND Flowers.Id=FlowersFlower_compositions.Flowers_id \
+            AND FlowersFlower_compositions.Flower_compositions_id=OrdersFlower_compositions.Flower_compositions_id \
             AND OrdersFlower_compositions.Order_id=Orders.Id \
-            AND Orders.Id IN SELECT(Orders.Id FROM Orders WHERE \
-            Date_begin>=%d AND Date_begin<=%d) GROUP BY Flowers.Id", date_begin, date_end);
+            AND Orders.Id IN (SELECT Orders.Id FROM Orders WHERE Date_begin>=%d AND Date_begin<=%d) GROUP BY Flowers.Id", date_begin, date_end);
     
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
