@@ -45,7 +45,7 @@ void insert_data (sqlite3* db, struct User user)
     char date_begin[80];
     time_t seconds = time(0);
     struct tm* time_info = localtime(&seconds);
-    strftime(date_begin, 80, "%d%d%d", time_info);
+    strftime(date_begin, 80, "%Y%m%d", time_info);
     
     sprintf(sql, "INSERT INTO Orders VALUES (%d, %s, %s, %d, %d)", order_id + 1 ,date_begin, date_end, amount, cust_id);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -56,7 +56,7 @@ void insert_data (sqlite3* db, struct User user)
     }
     else {
         fprintf(stdout, "Data was inserted successfully\n");
-        printf("The last id of the inserted row is %lld\n",sqlite3_last_insert_rowid(db));
+        printf("The last id of the inserted row is %lld\n", sqlite3_last_insert_rowid(db));
     }
     free(sql);
     
@@ -94,13 +94,11 @@ void update_data (sqlite3* db)
     fprintf(stdout, "put 1 to update cost of the flower or 2 to update order : ");
     int type;
     scanf("%d", &type);
-    if (type == 1)
-    {
+    if (type == 1) {
         forbid_increase_price(db);
     }
-    else
-    {
-        fprintf(stdout, "\nput data need to update ([id] [field] [value]): ");
+    else {
+        fprintf(stdout, "put data need to update ([id] [field] [value]): ");
         scanf("%d %s %s",&id, field, value);
         sprintf(sql, "UPDATE Orders SET %s = '%s' WHERE Id = %d", field, value, id);
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);

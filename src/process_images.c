@@ -60,7 +60,7 @@ void insert_image (sqlite3* db)
     int rc;
     char* sql;
     
-    sql = "UPDATE states SET Photo=@Photo WHERE id = @id";
+    sql = "UPDATE Flowers SET Photo=@Photo WHERE id = @id";
     rc = sqlite3_prepare(db, sql, -1, &p_stmt, 0);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Cannot prepare statement: %s\n", sqlite3_errmsg(db));

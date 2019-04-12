@@ -95,7 +95,6 @@ void forbid_increase_price (sqlite3* db)
         free(sql1);
         step = sqlite3_step(res);
     }
-    
 
     if (com_new_cost - com_old_cost <= com_old_cost * 0.1)
     {
@@ -137,9 +136,6 @@ void count_order_price (sqlite3* db, int order_id, char date_begin[], char date_
     else
         fprintf(stdout,"No such records\n");
     
-    //fprintf(stdout, "%d\n", cost);
-    
-    
     sprintf(sql, "SELECT Amount FROM Flower_compositions WHERE Id IN \
             (SELECT Flower_compositions_id FROM OrdersFlower_compositions WHERE Order_id=%d)", order_id);
     
@@ -154,8 +150,6 @@ void count_order_price (sqlite3* db, int order_id, char date_begin[], char date_
     else
         fprintf(stdout,"No such records\n");
     
-    //fprintf(stdout, "%d\n", amount_flowers);
-    
     int sum = amount * amount_flowers * cost;
     
     sprintf(sql, "SELECT max(Order_id) FROM OrderCost");
@@ -164,7 +158,6 @@ void count_order_price (sqlite3* db, int order_id, char date_begin[], char date_
     int order_cost_id = 0;
     if (step == SQLITE_ROW)
         order_cost_id = sqlite3_column_int(res, 0);
-        //atoi((char*)sqlite3_column_text(res, 0));
     
     sprintf(sql, "INSERT INTO OrderCost VALUES (%d, %d)", order_cost_id + 1, sum);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -174,7 +167,7 @@ void count_order_price (sqlite3* db, int order_id, char date_begin[], char date_
         sqlite3_free(err_msg);
     }
     else {
-        fprintf(stdout, "Order with the cost = %d was inserted successfully\n", sum);
+        fprintf(stdout, "Order with the cost = %d\n", sum);
     }
     
     sqlite3_finalize(res);
