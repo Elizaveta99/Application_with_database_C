@@ -110,7 +110,7 @@ void forbid_increase_price (sqlite3* db)
             fprintf(stdout, "Data was updated successfully\n");
     }
     else
-        fprintf(stdout, "Failde! Summary cost of all compositions with this flower increased more than 10 percent\n");
+        fprintf(stdout, "Failed! Summary cost of all compositions with this flower increased more than 10 percent\n");
     
     free(sql);
 }

@@ -54,8 +54,6 @@ void select_data(sqlite3* db, struct User user)
     fprintf(stdout, "Your choice: ");
     scanf( "%d", &choice);
     
-    int flag = 0;
-    
     switch(choice)
     {
         case 1:
@@ -83,30 +81,26 @@ void select_data(sqlite3* db, struct User user)
             break;
         }
         case 2:
-            get_sum_for_period(db);
+            get_sum_for_period(db, &res);
             break;
         case 3:
             get_max_demand_composition_info(db, &res);
-            flag = 1;
             break;
         case 4:
-            get_express_orders_count(db);
+            get_express_orders_count(db, &res);
             break;
         case 5:
             get_used_flowers_count(db, &res); //
-            flag = 1;
+            break;
         case 6:
             get_sailed_compositions_info(db, &res);
-            flag = 1;
             break;
         case 7:
             get_orders_for_date(db, &res);
-            flag = 1;
             break;
         default:
             break;
     }
-    if (flag == 1) {
     int step = sqlite3_step(res);
     int column = sqlite3_column_count(res);
     if (step == SQLITE_ROW)
@@ -117,31 +111,23 @@ void select_data(sqlite3* db, struct User user)
         print_results(res, column);
         step = sqlite3_step(res);
     }
-    }
      sqlite3_finalize(res);
 }
 
-void get_sum_for_period (sqlite3* db)
+void get_sum_for_period (sqlite3* db, sqlite3_stmt **res)
 {
     char *sql = malloc(256);
     int date_begin, date_end;
-    sqlite3_stmt *res = NULL;
     
     scanf(" %d %d", &date_begin, &date_end);
     
-    sprintf(sql, "SELECT sum(Cost) FROM OrderCost WHERE Order_id IN \
+    sprintf(sql, "SELECT sum(Cost) AS Sum_for_period FROM OrderCost WHERE Order_id IN \
             (SELECT Id FROM Orders WHERE Date_begin>=%d AND Date_begin<=%d)", date_begin, date_end);
     
-    int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+    int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    
-    int step = sqlite3_step(res);
-    int sum = -1;
-    if (step == SQLITE_ROW)
-        sum = sqlite3_column_int(res, 0);
-    
-    fprintf(stdout, "Sum for this period = %d\n", sum);
+    free(sql);
 }
 
 void get_max_demand_composition_info(sqlite3* db, sqlite3_stmt **res)
@@ -158,43 +144,36 @@ void get_max_demand_composition_info(sqlite3* db, sqlite3_stmt **res)
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+    //free(sql);
 }
 
-void get_express_orders_count(sqlite3* db)
+void get_express_orders_count(sqlite3* db, sqlite3_stmt **res)
 {
     char *sql = malloc(256);
-    sqlite3_stmt *res = NULL;
     
     sprintf(sql, "SELECT count(Id) FROM Orders WHERE (Date_end-Date_begin<=1)");
     
-    int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+    int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-    
-    int step = sqlite3_step(res);
-    int count = -1;
-    if (step == SQLITE_ROW)
-        count = sqlite3_column_int(res, 0);
-    
-    fprintf(stdout, "Amount of express orders = %d\n", count);
+    free(sql);
 }
 
 void get_used_flowers_count(sqlite3* db, sqlite3_stmt **res)
 {
-    char *sql = malloc(256);
+    char* sql = malloc(1000);
     int date_begin, date_end;
-   // sqlite3_stmt *res = NULL;
     
-    //fprintf(stdout, "Enter period ([date_degin (YYYYMMDD)] [date_end (YYYYMMDD)])\n");
     scanf(" %d %d", &date_begin, &date_end);
     
-    sprintf(sql, "SELECT Flowers.Name, Flowers.Kind, (Flower_compositions.Amount) * count(Flowers.Id) \
-            FROM Flowers, Flower_compositions, FlowersFlower_compositions, OrdersFlower_compositions, Orders \
-            WHERE Flower_compositions.Id=FlowersFlower_compositions.Flower_compositions_id \
-            AND Flowers.Id=FlowersFlower_compositions.Flowers_id \
-            AND FlowersFlower_compositions.Flower_compositions_id=OrdersFlower_compositions.Flower_compositions_id \
-            AND OrdersFlower_compositions.Order_id=Orders.Id \
-            AND Orders.Id IN (SELECT Orders.Id FROM Orders WHERE Date_begin>=%d AND Date_begin<=%d) GROUP BY Flowers.Id", date_begin, date_end);
+    sprintf(sql, "SELECT Flowers.Name, Flowers.Kind, sum((Flower_compositions.Amount)) AS Amount_of_used_flowers \
+            FROM Flowers, Flower_compositions \
+            WHERE Flowers.Id IN (SELECT FlowersFlower_compositions.Flowers_id \
+            FROM FlowersFlower_compositions, OrdersFlower_compositions, Orders \
+            WHERE  FlowersFlower_compositions.Flower_compositions_id=OrdersFlower_compositions.Flower_compositions_id \
+            AND OrdersFlower_compositions.Order_id=Orders.Id AND Orders.Id \
+            IN (SELECT Orders.Id FROM Orders WHERE Orders.Date_begin>=%d AND Orders.Date_begin<=%d) AND Flower_compositions.Id \
+            IN (SELECT FlowersFlower_compositions.Flower_compositions_id FROM FlowersFlower_compositions WHERE FlowersFlower_compositions.Flowers_id=Flowers.Id)) GROUP BY Flowers.Id", date_begin, date_end);
     
     int rc = sqlite3_prepare_v2(db, sql, -1, res, 0);
     if (rc != SQLITE_OK)
